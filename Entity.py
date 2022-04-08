@@ -10,6 +10,13 @@ class Entity:
         self.__rect__ = pygame.Rect(self.__x, self.__y, self.__width, self.__height)
         self.__color__ = (255, 0, 0)
 
+        self.__max_hp = 100
+        self.__current_hp = self.__max_hp
+        self.__STATUS = ENTITY_STATUS_NEUTRAL
+
+    def getCurrentHp(self):
+        return self.__current_hp
+
     def getX(self):
         return self.__rect__.x
 
@@ -22,7 +29,7 @@ class Entity:
     def getHeight(self):
         return self.__height
 
-    def getSizeOfPositionAsBytes(self, msg):
+    def getSizeOfDataAsBytes(self, msg):
         s = len(msg)
         return s
 
@@ -30,13 +37,13 @@ class Entity:
         self.__rect__.x = x
         self.__rect__.y = y
 
-    def getPositionAsBytes(self):
-        msg = f"{self.__rect__.x},{self.__rect__.y}".encode(TEXT_FORMAT)
-        size = self.getSizeOfPositionAsBytes(msg)
+    def getDataAsBytes(self):
+        msg = f"{self.__rect__.x},{self.__rect__.y},{self.__current_hp},{self.__STATUS}".encode(TEXT_FORMAT)
+        size = self.getSizeOfDataAsBytes(msg)
         return msg, str(size).encode(TEXT_FORMAT)
 
     def getTrueForm(self):
-        return [self.__x, self.__y, self.__color__]
+        return [self.__x, self.__y, self.__color__, self.__current_hp, self.__STATUS]
 
     def __render(self, surf):
         pygame.draw.rect(surf, self.__color__, self.__rect__)

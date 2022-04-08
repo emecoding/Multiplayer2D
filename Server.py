@@ -22,7 +22,7 @@ class Server:
         conn.send(msg)
         is_connected = True
 
-        data = [x, y]
+        data = [x, y, 100, ENTITY_STATUS_NEUTRAL]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
@@ -42,9 +42,10 @@ class Server:
                     is_connected = False
                 else:
                     splitted_coming_data = coming_data.split(",")
+                    print(splitted_coming_data)
                     if my_index > len(game.entities) - 1:
                         my_index = len(game.entities) - 1
-                    game.entities[my_index] = [splitted_coming_data[0], splitted_coming_data[1]]
+                    game.entities[my_index] = [splitted_coming_data[0], splitted_coming_data[1], splitted_coming_data[2], splitted_coming_data[3]]
                     other_entities_lst = game.get_entities_without_one_index(my_index)
 
                     size_of_other_entities_lst = self.get_size_of_list_as_bytes(other_entities_lst)

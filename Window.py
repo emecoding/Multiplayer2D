@@ -16,18 +16,20 @@ class Window:
 
     def __update_entities(self, entities, player):
         keys = pygame.key.get_pressed()
-        rects = []
+        es = []
         for entity in entities:
             rect = pygame.Rect(entity[0], entity[1], 32, 32)
-            rects.append(rect)
-            pygame.draw.rect(self.__SURFACE, entity[2], rect)
+            es.append([rect, entity[2], entity[3]])
+            pygame.draw.rect(self.__SURFACE, entity[4], rect)
             #entity.update(self.__SURFACE, keys)
 
-        player.update(self.__SURFACE, keys, entities=rects)
+        player.update(self.__SURFACE, keys, entities=es)
+
+        return es
 
     def loop(self, entities, player):
         self.__SURFACE.fill("white")
-        self.__update_entities(entities, player)
+        es = self.__update_entities(entities, player)
         self.__win.blit(self.__SURFACE, (0, 0))
         pygame.display.update()
 
@@ -40,4 +42,4 @@ class Window:
 
         self.__clock.tick(60)
 
-        return self.__should_close
+        return self.__should_close, es

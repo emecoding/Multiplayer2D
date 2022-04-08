@@ -31,14 +31,19 @@ class Client:
         self.__client_socket.close()
         print("Closed connection to the server...")
 
+    def get_size_of_list_as_bytes(self, lst:list):
+        s = lst.__sizeof__()
+        s = str(s).encode(TEXT_FORMAT)
+        return s
+
     def __update(self):
-        pos, size = self.__player.getPositionAsBytes()
+        data, size = self.__player.getDataAsBytes()
         self.__client_socket.send(size)
         coming_data_size_message_was_succesfull = self.__client_socket.recv(1025).decode(TEXT_FORMAT)
         if coming_data_size_message_was_succesfull == MESSAGE_WAS_FAILED_TO_RECEIVE:
             self.__is_connected = False
         elif coming_data_size_message_was_succesfull == MESSAGE_WAS_SENT_SUCCESSFULLY:
-            self.__client_socket.send(pos)
+            self.__client_socket.send(data)
 
         other_entities_size = self.__client_socket.recv(1024)
         if not other_entities_size:
@@ -53,14 +58,12 @@ class Client:
 
         entities = []
         for entity in other_entities:
-            entities.append([int(entity[0]), int(float(entity[1])), (255, 0, 0)])
+            entities.append([int(entity[0]), int(float(entity[1])), int(entity[2]), str(entity[3]), (255, 255, 0)])
 
-        should_close = self.__window.loop(entities, self.__player)
+        should_close, es = self.__window.loop(entities, self.__player)
         if should_close: self.__is_connected = False
 
-
-
-
+        #size_of_es = self.get_size_of_list_as_bytes(es)
 
 client = Client(PORT, HOST)
 client.connect()

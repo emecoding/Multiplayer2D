@@ -1,4 +1,5 @@
 from Entity import Entity
+from Config import *
 import pygame
 pygame.init()
 
@@ -12,21 +13,25 @@ class Player(Entity):
         self.__jump_force = 20
         self.__is_grounded = False
         self.__jumped = False
+        self.__shoot_range = 100
+        self.__facing_right = True
 
     def __hor_movement_collision(self, lst, DX):
         dx = DX
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             dx += self.__speed
+            self.__facing_right = True
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             dx -= self.__speed
+            self.__facing_right = False
 
         for other in lst:
-            if other.colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
+            if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
                 if dx > 0:
-                    self.__rect__.right = other.left
+                    self.__rect__.right = other[0].left
                 elif dx < 0:
-                    self.__rect__.left = other.right
+                    self.__rect__.left = other[0].right
                 dx = 0
 
         self.__rect__.x += dx
@@ -47,7 +52,7 @@ class Player(Entity):
         dy += self.__vel_y
 
         for other in lst:
-            if other.colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
+            if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
                 if self.__vel_y < 0:
                     dy = 0
                     self.__vel_y = 0
@@ -66,7 +71,7 @@ class Player(Entity):
         return dy
 
 
-    def __move(self, keys, entities):
+    def __move(self, keys, entities, surf):
         x = self.getX()
         y = self.getY()
         dx = 0
@@ -74,6 +79,21 @@ class Player(Entity):
 
         dx = self.__hor_movement_collision(entities, dx)
         dy = self.__ver_movement_collision(entities, dy)
+
+        if keys[pygame.K_SPACE] or keys[pygame.K_DOWN]:
+            rect = None
+            if self.__facing_right:
+                rect = pygame.Rect(x + self.getWidth(), y, self.__shoot_range, 20)
+            else:
+                rect = pygame.Rect(x - self.__shoot_range, y, self.__shoot_range, 20)
+
+            pygame.draw.rect(surf, (255, 0, 0), rect)
+            for other in entities:
+                if other[0].colliderect(rect):
+                    other[1] -= 1
+                    other[2] = ENTITY_STATUS_TAKE_DAMAGE
+                else:
+                    other[2] = ENTITY_STATUS_NEUTRAL
 
         '''if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             dx -= self.__speed
@@ -104,6 +124,6 @@ class Player(Entity):
 
     def update(self, surf, keys, render=True, entities=None):
         super().update(surf, keys, render=render)
-        self.__move(keys, entities)
+        self.__move(keys, entities, surf)
 
 
