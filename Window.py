@@ -94,6 +94,7 @@ class Window:
             self.__SURFACE.blit(text[0], (text[1], text[2]))
 
         self.__win.blit(self.__SURFACE, (0, 0))
+        self.check_for_input()
         self.update()
 
         return self.__should_close

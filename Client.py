@@ -26,7 +26,7 @@ class Client:
 
     def __initialize(self, x, y, id):
         self.__player = Player(x, y)
-        self.__window = Window(800, 600, f"Multiplayer 2D({id})")
+        self.__window = Window(800, 600, f"Multiplayer 2D({id})({self.__name})")
 
     def connect(self):
         self.__client_socket.connect((self.__HOST, self.__PORT))
@@ -49,7 +49,11 @@ class Client:
 
         starting = GAME_NOT_STARTING_MESSAGE
         while starting == GAME_NOT_STARTING_MESSAGE:
-            data = self.__client_socket.recv(1024).decode(TEXT_FORMAT)
+            data = self.__client_socket.recv(1024)
+            if not data:
+                self.__is_connected = False
+                break
+            data = data.decode(TEXT_FORMAT)
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
             if len(self.__texts) == 0:
                 text = self.__font.render("Waiting for players...", True, (0, 0, 0), (255, 255, 255))
@@ -144,6 +148,7 @@ class Client:
 
             self.__player.setPosition(pos[0], pos[1])
             self.__player.has_won = False
+            self.__player.start_timer()
 
         should_close = self.__window.loop(self.__compine_two_lists(other_entities, self.__map_entities), self.__player)
         if should_close: self.__is_connected = False

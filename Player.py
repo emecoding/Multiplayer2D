@@ -84,14 +84,15 @@ class Player(Entity):
             if other[1] not in self.__ignore:
                 if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
                     self.__check_for_win(other[1])
-                    self.__check_for_death(other[1])
-                    if self.__vel_y < 0:
-                        dy = 0
-                        self.__vel_y = 0
-                    elif self.__vel_y >= 0:
-                        dy = 0
-                        self.__jumped = False
-                        self.__vel_y = 0
+                    died = self.__check_for_death(other[1])
+                    if died == False:
+                        if self.__vel_y < 0:
+                            dy = 0
+                            self.__vel_y = 0
+                        elif self.__vel_y >= 0:
+                            dy = 0
+                            self.__jumped = False
+                            self.__vel_y = 0
 
         if self.__rect__.y + dy >= 600 - self.getHeight():
             dy = 0

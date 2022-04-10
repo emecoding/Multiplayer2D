@@ -39,14 +39,22 @@ class Server:
         my_index = len(game.entities) - 1
 
         while len(game.entities) < 2:
-            is_connected = False
-            conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
-            conn.recv(1024)
-        conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
-        conn.recv(1024)
-        is_connected = True
+            try:
+                conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
+                conn.recv(1024)
+            except:
+                is_connected = False
+                break
 
-        print("Game started!")
+
+        conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
+        r = conn.recv(1024)
+        if not r:
+            is_connected = False
+        else:
+            print("Game started!")
+
+        
         while is_connected:
             coming_data_size = conn.recv(1024)
             if not coming_data_size:
@@ -157,6 +165,7 @@ class Server:
     def start(self):
         self.__server_socket.bind((self.__HOST, self.__PORT))
         self.__server_socket.listen()
+        print("Server started!")
         while self.__LOOKING_FOR_CONNECTIONS:
             conn, addr = self.__server_socket.accept()
             print(f"Connection from {addr}")

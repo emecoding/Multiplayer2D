@@ -16,6 +16,10 @@ class Entity:
         self.__time_addition__ = 1
         self.__timer_is_ticking__ = True
 
+    def start_timer(self):
+        self.__timer__ = 0
+        self.__timer_is_ticking__ = True
+
     def getX(self):
         return self.__rect__.x
 
