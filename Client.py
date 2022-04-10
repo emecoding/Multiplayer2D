@@ -1,4 +1,7 @@
-import socket, random, pickle
+import socket, random, pickle, time
+
+import pygame.font
+
 from Config import *
 from Player import Player
 from Window import Window
@@ -14,6 +17,12 @@ class Client:
         self.__window: Window = None
         self.__is_connected = True
         self.__map_entities = []
+        self.__name = self.__get_name()
+        self.__texts = []
+        self.__font = pygame.font.SysFont('freesansbold.ttf', 32)
+
+    def __get_name(self):
+        return str(input("Type name: "))
 
     def __initialize(self, x, y, id):
         self.__player = Player(x, y)
@@ -32,6 +41,8 @@ class Client:
         size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
         self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
         self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
+
+        self.__client_socket.send(self.__name.encode(TEXT_FORMAT))
 
         self.__initialize(x, y, id)
         while self.__is_connected:
@@ -91,9 +102,8 @@ class Client:
             self.__is_connected = False
             return
 
-        new_level_coming = pickle.loads(new_level_coming)
-        #self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-        if new_level_coming == NEW_LEVEL_COMING_TRUE:
+        new_level_data = pickle.loads(new_level_coming)
+        if new_level_data[0] == NEW_LEVEL_COMING_TRUE:
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
             pos = pickle.loads(self.__client_socket.recv(1024))
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
@@ -102,6 +112,13 @@ class Client:
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
             self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+
+
+            text = self.__font.render(f"Winner Is {new_level_data[1]}", True, (0, 0, 0), (255, 255, 255))
+            self.__texts.append([text, 0, 0, 3])
+
+            self.__window.render_texts(self.__texts, [], self.__player)
+            time.sleep(3)
 
             self.__player.setPosition(pos[0], pos[1])
             self.__player.has_won = False

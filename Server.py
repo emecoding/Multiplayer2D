@@ -26,8 +26,14 @@ class Server:
         conn.send(pickle.dumps(size_of_map_entities))
         conn.recv(1024)
         conn.send(pickle.dumps(map_entities))
+        name = conn.recv(1024)
+        if not name:
+            is_connected = False
 
-        data = [spawn_pos[0], spawn_pos[1]]
+        name = name.decode(TEXT_FORMAT)
+
+
+        data = [name, spawn_pos[0], spawn_pos[1], False, 0.0]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
@@ -52,7 +58,7 @@ class Server:
             if coming_data[2] == "True":
                 has_won = True
 
-            game.entities[my_index] = [int(coming_data[0]), int(coming_data[1]), has_won]
+            game.entities[my_index] = [game.entities[my_index][0], int(coming_data[0]), int(coming_data[1]), has_won, float(coming_data[3])]
 
             other_entities = game.get_entities_without_one_index(my_index)
             _, size_of_other_entities = self.get_size_of_list_as_bytes(other_entities)
@@ -68,12 +74,12 @@ class Server:
 
             conn.recv(1024)
 
-            won = self.__check_for_wins(game)
+            won, fastest_player = self.__check_for_wins(game)
 
             if won:
                 game.current_map_index_plus()
                 map_entities, spawn_pos = game.get_map_entities()
-                conn.send(pickle.dumps(NEW_LEVEL_COMING_TRUE))
+                conn.send(pickle.dumps([NEW_LEVEL_COMING_TRUE, fastest_player[0]]))
                 result = conn.recv(1024)
                 conn.send(pickle.dumps(spawn_pos))
                 conn.recv(1024)
@@ -97,11 +103,21 @@ class Server:
         winners = 0
         for e in game.entities:
             if len(e) > 2:
-                if e[2]:
+                if e[3]:
                     winners += 1
 
-        return winners == len(game.entities)
+        if winners == len(game.entities):
+            return True, self.__get_fastest(game)
 
+        return False, None
+
+    def __get_fastest(self, game):
+        fastest_player = game.entities[0]
+        for e in game.entities:
+            if e[4] < fastest_player[4]:
+                e = fastest_player
+
+        return fastest_player
 
 
     def get_size_of_list_as_bytes(self, lst:list):

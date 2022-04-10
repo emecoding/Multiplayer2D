@@ -21,10 +21,10 @@ class Game:
         spawn_y = 0
         for i in self.__maps[self.__current_map]:
             if i[2] == "SPAWN_POINT":
-                spawn_x = i[0]
+                spawn_x = i[0] + (37 * len(self.entities))
                 spawn_y = i[1]
                 break
-        return self.__maps[self.__current_map], (spawn_x, spawn_y)
+        return self.__maps[self.__current_map], [spawn_x, spawn_y]
 
     def __load_map(self, path):
         map = load(path)

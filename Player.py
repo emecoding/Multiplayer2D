@@ -20,9 +20,15 @@ class Player(Entity):
         self.__ignore = ["SPAWN_POINT"]
 
 
+
+    def getTime(self):
+        return self.__timer__
+
+
     def __check_for_win(self, id):
         if id == "WIN":
             self.has_won = True
+            self.__timer_is_ticking__ = False
 
     def __check_for_death(self, id):
         if "KILLER" in str(id):
@@ -33,7 +39,6 @@ class Player(Entity):
     def __die(self):
         self.__deaths += 1
         self.respawn()
-        print(self.__deaths)
         return True
 
     def __hor_movement_collision(self, lst, DX):
@@ -114,10 +119,14 @@ class Player(Entity):
         if y > 600 + self.getHeight():
             self.respawn()
 
+    def __timer_tick(self):
+        if self.__timer_is_ticking__:
+            self.__timer__ += self.__time_addition__
 
 
     def update(self, surf, keys, other_rects, render=True):
         super().update(surf, keys, other_rects, render=render)
         self.__move(keys, other_rects, surf)
+        self.__timer_tick()
 
 
