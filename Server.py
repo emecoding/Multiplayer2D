@@ -23,10 +23,10 @@ class Server:
         msg = f"{x},{y},{id}".encode(TEXT_FORMAT)
         conn.send(msg)
         conn.recv(1024)
-        _, size_of_map_entities = self.get_size_of_list_as_bytes(game.map_entities)
+        _, size_of_map_entities = self.get_size_of_list_as_bytes(game.get_map_entities())
         conn.send(pickle.dumps(size_of_map_entities))
         conn.recv(1024)
-        conn.send(pickle.dumps(game.map_entities))
+        conn.send(pickle.dumps(game.get_map_entities()))
 
         data = [x, y]
         game.entities.append(data)
@@ -36,7 +36,6 @@ class Server:
             coming_data_size = conn.recv(1024)
             if not coming_data_size:
                 is_connected = False
-                conn.send(MESSAGE_WAS_FAILED_TO_RECEIVE.encode(TEXT_FORMAT))
                 break
 
             coming_data_size = int(coming_data_size.decode(TEXT_FORMAT))
@@ -70,8 +69,18 @@ class Server:
             if result == MESSAGE_WAS_SENT_SUCCESSFULLY:
                 conn.send(pickle.dumps(other_entities))
 
-            print(self.__check_for_wins(game))
-            #self.__check_for_wins(game)
+            won = self.__check_for_wins(game)
+
+            if won:
+                game.current_map_index_plus()
+                _, size_of_map_entities = self.get_size_of_list_as_bytes(game.get_map_entities())
+                conn.send(pickle.dumps(NEW_LEVEL_COMING_TRUE))
+                conn.send(pickle.dumps(size_of_map_entities))
+                conn.recv(1024)
+                conn.send(pickle.dumps(game.get_map_entities()))
+            else:
+                conn.send(pickle.dumps(NEW_LEVEL_COMING_FALSE))
+
 
         conn.close()
         game.entities.remove(game.entities[my_index])

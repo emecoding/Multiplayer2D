@@ -19,7 +19,7 @@ class Player(Entity):
 
     def __check_for_win(self, id):
         if id == "WIN":
-            self.__has_won__ = True
+            self.has_won = True
 
     def __hor_movement_collision(self, lst, DX):
         dx = DX

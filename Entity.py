@@ -9,7 +9,7 @@ class Entity:
 
         self.__rect__ = pygame.Rect(self.__x, self.__y, self.__width, self.__height)
         self.__color__ = (255, 0, 0)
-        self.__has_won__ = False
+        self.has_won = False
 
 
     def getX(self):
@@ -33,7 +33,7 @@ class Entity:
         self.__rect__.y = y
 
     def getDataAsBytes(self):
-        msg = f"{self.__rect__.x},{self.__rect__.y},{self.__has_won__}"
+        msg = f"{self.__rect__.x},{self.__rect__.y},{self.has_won}"
         decoded_msg = msg.encode(TEXT_FORMAT)
         size = self.getSizeOfDataAsBytes(msg)
         return decoded_msg, str(size).encode(TEXT_FORMAT), msg

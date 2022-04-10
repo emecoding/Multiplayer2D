@@ -71,14 +71,29 @@ class Client:
 
         other_entities = self.__client_socket.recv(other_entities_size)
         if not other_entities:
-            self.__client_socket = False
+            self.__is_connected = False
             return
 
         other_entities = pickle.loads(other_entities)
 
+
+
+        new_level_coming = self.__client_socket.recv(1024)
+        if not new_level_coming:
+            self.__is_connected = False
+            return
+
+        new_level_coming = pickle.loads(new_level_coming)
+        if new_level_coming == NEW_LEVEL_COMING_TRUE:
+            #print("Coming")
+            size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
+            self.__player.setPosition(0, self.__player.getY())
+            self.__player.has_won = False
+
         should_close = self.__window.loop(self.__compine_two_lists(other_entities, map_entities), self.__player)
         if should_close: self.__is_connected = False
-
 
 client = Client(PORT, HOST)
 client.connect()
