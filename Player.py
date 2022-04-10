@@ -16,6 +16,11 @@ class Player(Entity):
         self.__shoot_range = 100
         self.__facing_right = True
 
+
+    def __check_for_win(self, id):
+        if id == "WIN":
+            self.__has_won__ = True
+
     def __hor_movement_collision(self, lst, DX):
         dx = DX
         keys = pygame.key.get_pressed()
@@ -28,6 +33,7 @@ class Player(Entity):
 
         for other in lst:
             if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
+                self.__check_for_win(other[1])
                 if dx > 0:
                     self.__rect__.right = other[0].left
                 elif dx < 0:
@@ -53,6 +59,7 @@ class Player(Entity):
 
         for other in lst:
             if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
+                self.__check_for_win(other[1])
                 if self.__vel_y < 0:
                     dy = 0
                     self.__vel_y = 0
@@ -80,50 +87,10 @@ class Player(Entity):
         dx = self.__hor_movement_collision(entities, dx)
         dy = self.__ver_movement_collision(entities, dy)
 
-        if keys[pygame.K_SPACE] or keys[pygame.K_DOWN]:
-            rect = None
-            if self.__facing_right:
-                rect = pygame.Rect(x + self.getWidth(), y, self.__shoot_range, 20)
-            else:
-                rect = pygame.Rect(x - self.__shoot_range, y, self.__shoot_range, 20)
-
-            pygame.draw.rect(surf, (255, 0, 0), rect)
-            for other in entities:
-                if other[0].colliderect(rect):
-                    other[1] -= 1
-                    other[2] = ENTITY_STATUS_TAKE_DAMAGE
-                else:
-                    other[2] = ENTITY_STATUS_NEUTRAL
-
-        '''if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            dx -= self.__speed
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            dx += self.__speed
-
-        if (keys[pygame.K_w] or keys[pygame.K_UP]) and self.__is_grounded:
-            dy -= self.__jump_force
 
 
-
-        if y < 600 - self.getHeight():
-            self.__vel_y += self.__acc_y
-            self.__is_grounded = False
-        else:
-            self.__vel_y = 0
-            y = 600 - self.getHeight()
-            self.__is_grounded = True
-
-        dy += self.__vel_y
-
-        x += dx
-        y += dy
-
-        self.setPosition(x, y)'''
-
-
-
-    def update(self, surf, keys, render=True, entities=None):
-        super().update(surf, keys, render=render)
-        self.__move(keys, entities, surf)
+    def update(self, surf, keys, other_rects, render=True):
+        super().update(surf, keys, other_rects, render=render)
+        self.__move(keys, other_rects, surf)
 
 

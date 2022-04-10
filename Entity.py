@@ -9,13 +9,8 @@ class Entity:
 
         self.__rect__ = pygame.Rect(self.__x, self.__y, self.__width, self.__height)
         self.__color__ = (255, 0, 0)
+        self.__has_won__ = False
 
-        self.__max_hp = 100
-        self.__current_hp = self.__max_hp
-        self.__STATUS = ENTITY_STATUS_NEUTRAL
-
-    def getCurrentHp(self):
-        return self.__current_hp
 
     def getX(self):
         return self.__rect__.x
@@ -38,12 +33,13 @@ class Entity:
         self.__rect__.y = y
 
     def getDataAsBytes(self):
-        msg = f"{self.__rect__.x},{self.__rect__.y},{self.__current_hp},{self.__STATUS}".encode(TEXT_FORMAT)
+        msg = f"{self.__rect__.x},{self.__rect__.y},{self.__has_won__}"
+        decoded_msg = msg.encode(TEXT_FORMAT)
         size = self.getSizeOfDataAsBytes(msg)
-        return msg, str(size).encode(TEXT_FORMAT)
+        return decoded_msg, str(size).encode(TEXT_FORMAT), msg
 
     def getTrueForm(self):
-        return [self.__x, self.__y, self.__color__, self.__current_hp, self.__STATUS]
+        return [self.__rect__.x, self.__rect__.y]
 
     def __render(self, surf):
         pygame.draw.rect(surf, self.__color__, self.__rect__)
@@ -51,6 +47,6 @@ class Entity:
     def setColor(self, color):
         self.__color__ = color
 
-    def update(self, surf, keys, render=True, entities=None):
+    def update(self, surf, keys, other_rects, render=True):
         if render:
             self.__render(surf)

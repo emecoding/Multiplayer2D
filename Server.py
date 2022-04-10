@@ -3,6 +3,7 @@ from Config import *
 from Game import Game
 import sys, pickle
 
+
 class Server:
     def __init__(self, PORT, HOST):
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,58 +16,82 @@ class Server:
         self.__GAMES = []
 
     def __threaded_client(self, conn:socket.socket, addr, game):
+        is_connected = True
         x = random.randint(0, 600)
         y = 100
         id = len(game.entities)
         msg = f"{x},{y},{id}".encode(TEXT_FORMAT)
         conn.send(msg)
-        is_connected = True
+        conn.recv(1024)
+        _, size_of_map_entities = self.get_size_of_list_as_bytes(game.map_entities)
+        conn.send(pickle.dumps(size_of_map_entities))
+        conn.recv(1024)
+        conn.send(pickle.dumps(game.map_entities))
 
-        data = [x, y, 100, ENTITY_STATUS_NEUTRAL]
+        data = [x, y]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
         while is_connected:
-            coming_data_size = conn.recv(1024).decode(TEXT_FORMAT)
+            coming_data_size = conn.recv(1024)
             if not coming_data_size:
-                conn.send(MESSAGE_WAS_FAILED_TO_RECEIVE.encode(TEXT_FORMAT))
                 is_connected = False
-            else:
-                conn.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-                coming_data = conn.recv(int(coming_data_size))
-                if not coming_data:
-                    is_connected = False
+                conn.send(MESSAGE_WAS_FAILED_TO_RECEIVE.encode(TEXT_FORMAT))
+                break
 
-                coming_data = coming_data.decode(TEXT_FORMAT)
-                if not coming_data:
-                    is_connected = False
-                else:
-                    splitted_coming_data = coming_data.split(",")
-                    print(splitted_coming_data)
-                    if my_index > len(game.entities) - 1:
-                        my_index = len(game.entities) - 1
-                    game.entities[my_index] = [splitted_coming_data[0], splitted_coming_data[1], splitted_coming_data[2], splitted_coming_data[3]]
-                    other_entities_lst = game.get_entities_without_one_index(my_index)
+            coming_data_size = int(coming_data_size.decode(TEXT_FORMAT))
+            conn.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            coming_data = conn.recv(coming_data_size)
+            if not coming_data:
+                is_connected = False
+                break
 
-                    size_of_other_entities_lst = self.get_size_of_list_as_bytes(other_entities_lst)
-                    other_entities_lst = pickle.dumps(other_entities_lst)
+            coming_data = coming_data.decode(TEXT_FORMAT).split(",")
 
-                    conn.send(size_of_other_entities_lst)
-                    result = conn.recv(1024).decode(TEXT_FORMAT)
-                    if result == MESSAGE_WAS_SENT_SUCCESSFULLY:
-                        conn.send(other_entities_lst)
+            if my_index >= len(game.entities):
+                my_index = len(game.entities) - 1
+            has_won = False
+            if coming_data[2] == "True":
+                has_won = True
+
+            game.entities[my_index] = [int(coming_data[0]), int(coming_data[1]), has_won]
+
+            other_entities = game.get_entities_without_one_index(my_index)
+            _, size_of_other_entities = self.get_size_of_list_as_bytes(other_entities)
 
 
+            conn.send(str(size_of_other_entities).encode(TEXT_FORMAT))
+            result = conn.recv(1024)
+            if not result:
+                is_connected = False
+                break
 
+            result = result.decode(TEXT_FORMAT)
+            if result == MESSAGE_WAS_SENT_SUCCESSFULLY:
+                conn.send(pickle.dumps(other_entities))
+
+            print(self.__check_for_wins(game))
+            #self.__check_for_wins(game)
 
         conn.close()
         game.entities.remove(game.entities[my_index])
         print(f"Connection from {addr} closed...")
 
+    def __check_for_wins(self, game):
+        winners = 0
+        for e in game.entities:
+            if len(e) > 2:
+                if e[2]:
+                    winners += 1
+
+        return winners == len(game.entities)
+
+
+
     def get_size_of_list_as_bytes(self, lst:list):
-        s = lst.__sizeof__()
-        s = str(s).encode(TEXT_FORMAT)
-        return s
+        s1 = lst.__sizeof__()
+        s = str(s1).encode(TEXT_FORMAT)
+        return s, len(pickle.dumps(lst))
 
     def __generate_id(self, howLong):
         id = 0
