@@ -13,6 +13,7 @@ class Client:
         self.__player: Player = None
         self.__window: Window = None
         self.__is_connected = True
+        self.__map_entities = []
 
     def __initialize(self, x, y, id):
         self.__player = Player(x, y)
@@ -30,11 +31,11 @@ class Client:
         self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
         size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
         self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-        map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
+        self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
 
         self.__initialize(x, y, id)
         while self.__is_connected:
-            self.__update(map_entities)
+            self.__update()
 
         self.__client_socket.close()
         print("Closed connection to the server...")
@@ -48,7 +49,7 @@ class Client:
 
         return lst
 
-    def __update(self, map_entities):
+    def __update(self):
         data, size, msg = self.__player.getDataAsBytes()
         self.__client_socket.send(size)
 
@@ -57,7 +58,7 @@ class Client:
             self.__is_connected = False
             return
 
-        result = result.decode(TEXT_FORMAT)
+        result = pickle.loads(result)
         if result == MESSAGE_WAS_SENT_SUCCESSFULLY:
             self.__client_socket.send(data)
 
@@ -66,17 +67,24 @@ class Client:
             self.__is_connected = False
             return
 
-        other_entities_size = int(other_entities_size.decode(TEXT_FORMAT))
-        self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+        other_entities_size = pickle.loads(other_entities_size)
 
-        other_entities = self.__client_socket.recv(other_entities_size)
+        self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+        s = 0
+        if type(other_entities_size) != int:
+            s = 1024
+        else:
+            s = other_entities_size
+
+        other_entities = self.__client_socket.recv(s)
         if not other_entities:
             self.__is_connected = False
             return
 
         other_entities = pickle.loads(other_entities)
+        self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
 
-
+        #---------------------------
 
         new_level_coming = self.__client_socket.recv(1024)
         if not new_level_coming:
@@ -84,15 +92,21 @@ class Client:
             return
 
         new_level_coming = pickle.loads(new_level_coming)
+        #self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
         if new_level_coming == NEW_LEVEL_COMING_TRUE:
-            #print("Coming")
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            pos = pickle.loads(self.__client_socket.recv(1024))
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+
             size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-            map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
-            self.__player.setPosition(0, self.__player.getY())
+            self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+
+            self.__player.setPosition(pos[0], pos[1])
             self.__player.has_won = False
 
-        should_close = self.__window.loop(self.__compine_two_lists(other_entities, map_entities), self.__player)
+        should_close = self.__window.loop(self.__compine_two_lists(other_entities, self.__map_entities), self.__player)
         if should_close: self.__is_connected = False
 
 client = Client(PORT, HOST)

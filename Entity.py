@@ -3,11 +3,12 @@ import pygame
 
 class Entity:
     def __init__(self, x, y):
-        self.__x = x
-        self.__y = y
         self.__width, self.__height = 32, 32
 
-        self.__rect__ = pygame.Rect(self.__x, self.__y, self.__width, self.__height)
+        self.__start_x = x
+        self.__start_y = y
+
+        self.__rect__ = pygame.Rect(x, y, self.__width, self.__height)
         self.__color__ = (255, 0, 0)
         self.has_won = False
 
@@ -31,6 +32,10 @@ class Entity:
     def setPosition(self, x, y):
         self.__rect__.x = x
         self.__rect__.y = y
+
+    def respawn(self):
+        self.__rect__.x = self.__start_x
+        self.__rect__.y = self.__start_y
 
     def getDataAsBytes(self):
         msg = f"{self.__rect__.x},{self.__rect__.y},{self.has_won}"

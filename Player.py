@@ -16,10 +16,25 @@ class Player(Entity):
         self.__shoot_range = 100
         self.__facing_right = True
 
+        self.__deaths = 0
+        self.__ignore = ["SPAWN_POINT"]
+
 
     def __check_for_win(self, id):
         if id == "WIN":
             self.has_won = True
+
+    def __check_for_death(self, id):
+        if "KILLER" in str(id):
+            return self.__die()
+
+        return False
+
+    def __die(self):
+        self.__deaths += 1
+        self.respawn()
+        print(self.__deaths)
+        return True
 
     def __hor_movement_collision(self, lst, DX):
         dx = DX
@@ -32,13 +47,16 @@ class Player(Entity):
             self.__facing_right = False
 
         for other in lst:
-            if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
-                self.__check_for_win(other[1])
-                if dx > 0:
-                    self.__rect__.right = other[0].left
-                elif dx < 0:
-                    self.__rect__.left = other[0].right
-                dx = 0
+            if other[1] not in self.__ignore:
+                if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
+                    self.__check_for_win(other[1])
+                    died = self.__check_for_death(other[1])
+                    if died == False:
+                        if dx > 0:
+                            self.__rect__.right = other[0].left
+                        elif dx < 0:
+                            self.__rect__.left = other[0].right
+                        dx = 0
 
         self.__rect__.x += dx
 
@@ -58,15 +76,17 @@ class Player(Entity):
         dy += self.__vel_y
 
         for other in lst:
-            if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
-                self.__check_for_win(other[1])
-                if self.__vel_y < 0:
-                    dy = 0
-                    self.__vel_y = 0
-                elif self.__vel_y >= 0:
-                    dy = 0
-                    self.__jumped = False
-                    self.__vel_y = 0
+            if other[1] not in self.__ignore:
+                if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
+                    self.__check_for_win(other[1])
+                    self.__check_for_death(other[1])
+                    if self.__vel_y < 0:
+                        dy = 0
+                        self.__vel_y = 0
+                    elif self.__vel_y >= 0:
+                        dy = 0
+                        self.__jumped = False
+                        self.__vel_y = 0
 
         if self.__rect__.y + dy >= 600 - self.getHeight():
             dy = 0
@@ -86,6 +106,13 @@ class Player(Entity):
 
         dx = self.__hor_movement_collision(entities, dx)
         dy = self.__ver_movement_collision(entities, dy)
+
+        if x < 0:
+            self.respawn()
+        if x > 800 + self.getWidth():
+            self.respawn()
+        if y > 600 + self.getHeight():
+            self.respawn()
 
 
 

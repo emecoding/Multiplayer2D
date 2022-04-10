@@ -16,19 +16,18 @@ class Server:
         self.__GAMES = []
 
     def __threaded_client(self, conn:socket.socket, addr, game):
+        map_entities, spawn_pos = game.get_map_entities()
         is_connected = True
-        x = random.randint(0, 600)
-        y = 100
         id = len(game.entities)
-        msg = f"{x},{y},{id}".encode(TEXT_FORMAT)
+        msg = f"{spawn_pos[0]},{spawn_pos[1]},{id}".encode(TEXT_FORMAT)
         conn.send(msg)
         conn.recv(1024)
-        _, size_of_map_entities = self.get_size_of_list_as_bytes(game.get_map_entities())
+        _, size_of_map_entities = self.get_size_of_list_as_bytes(map_entities)
         conn.send(pickle.dumps(size_of_map_entities))
         conn.recv(1024)
-        conn.send(pickle.dumps(game.get_map_entities()))
+        conn.send(pickle.dumps(map_entities))
 
-        data = [x, y]
+        data = [spawn_pos[0], spawn_pos[1]]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
@@ -39,7 +38,7 @@ class Server:
                 break
 
             coming_data_size = int(coming_data_size.decode(TEXT_FORMAT))
-            conn.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            conn.send(pickle.dumps(MESSAGE_WAS_SENT_SUCCESSFULLY))
             coming_data = conn.recv(coming_data_size)
             if not coming_data:
                 is_connected = False
@@ -57,9 +56,7 @@ class Server:
 
             other_entities = game.get_entities_without_one_index(my_index)
             _, size_of_other_entities = self.get_size_of_list_as_bytes(other_entities)
-
-
-            conn.send(str(size_of_other_entities).encode(TEXT_FORMAT))
+            conn.send(pickle.dumps(size_of_other_entities))
             result = conn.recv(1024)
             if not result:
                 is_connected = False
@@ -69,21 +66,31 @@ class Server:
             if result == MESSAGE_WAS_SENT_SUCCESSFULLY:
                 conn.send(pickle.dumps(other_entities))
 
+            conn.recv(1024)
+
             won = self.__check_for_wins(game)
 
             if won:
                 game.current_map_index_plus()
-                _, size_of_map_entities = self.get_size_of_list_as_bytes(game.get_map_entities())
+                map_entities, spawn_pos = game.get_map_entities()
                 conn.send(pickle.dumps(NEW_LEVEL_COMING_TRUE))
+                result = conn.recv(1024)
+                conn.send(pickle.dumps(spawn_pos))
+                conn.recv(1024)
+                _, size_of_map_entities = self.get_size_of_list_as_bytes(map_entities)
                 conn.send(pickle.dumps(size_of_map_entities))
                 conn.recv(1024)
-                conn.send(pickle.dumps(game.get_map_entities()))
+                conn.send(pickle.dumps(map_entities))
+                conn.recv(1024)
             else:
                 conn.send(pickle.dumps(NEW_LEVEL_COMING_FALSE))
 
 
         conn.close()
         game.entities.remove(game.entities[my_index])
+        if len(game.entities) == 0:
+            self.__GAMES.remove(game)
+            print(f"Removed a game with id {game.id}")
         print(f"Connection from {addr} closed...")
 
     def __check_for_wins(self, game):

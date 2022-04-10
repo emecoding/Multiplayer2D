@@ -61,11 +61,12 @@ class Window:
             if len(entity) > 2:
                 id = entity[2]
             other_rects.append([rect, id])
-            if id not in self.__get_every_block_id():
-                pygame.draw.rect(self.__SURFACE, (255, 0, 0), rect)
-            else:
-                img = self.__block_images[entity[2]]
-                self.__SURFACE.blit(img, (entity[0], entity[1]))
+            if id != "SPAWN_POINT":
+                if id not in self.__get_every_block_id():
+                    pygame.draw.rect(self.__SURFACE, (255, 0, 0), rect)
+                else:
+                    img = self.__block_images[entity[2]]
+                    self.__SURFACE.blit(img, (entity[0], entity[1]))
 
         player.update(self.__SURFACE, keys, other_rects)
 

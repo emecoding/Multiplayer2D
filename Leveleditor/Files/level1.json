@@ -1446,6 +1446,13 @@
             "y": 352,
             "collision": true,
             "items": []
+        },
+        {
+            "id": "SPAWN_POINT",
+            "x": 0,
+            "y": 352,
+            "collision": true,
+            "items": []
         }
     ]
 }
