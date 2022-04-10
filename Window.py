@@ -17,6 +17,12 @@ class Window:
 
         self.__add_every_block_img()
 
+    def get_width(self):
+        return self.__width
+
+    def get_height(self):
+        return self.__height
+
     def get_surface(self):
         return self.__SURFACE
 
@@ -82,23 +88,17 @@ class Window:
 
     def render_texts(self, texts, entities, player):
         self.__SURFACE.fill("white")
-        self.__update_entities(entities, player)
+        if player != None:
+            self.__update_entities(entities, player)
         for text in texts:
             self.__SURFACE.blit(text[0], (text[1], text[2]))
 
-
         self.__win.blit(self.__SURFACE, (0, 0))
         self.update()
 
+        return self.__should_close
 
-
-    def loop(self, entities, player):
-        self.__SURFACE.fill("white")
-        self.__update_entities(entities, player)
-
-        self.__win.blit(self.__SURFACE, (0, 0))
-        self.update()
-
+    def check_for_input(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.__should_close = True
@@ -106,6 +106,16 @@ class Window:
                 if event.key == pygame.K_ESCAPE:
                     self.__should_close = True
 
+        return self.__should_close
+
+    def loop(self, entities, player):
+        self.__SURFACE.fill("white")
+        if player != None:
+            self.__update_entities(entities, player)
+
+        self.__win.blit(self.__SURFACE, (0, 0))
+        self.update()
+        self.check_for_input()
         self.__clock.tick(60)
 
         return self.__should_close

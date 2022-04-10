@@ -1,4 +1,4 @@
-import socket, random, pickle, time
+import socket, random, pickle, time, sys
 
 import pygame.font
 
@@ -36,6 +36,7 @@ class Client:
         x = int(splitted_data[0])
         y = int(splitted_data[1])
         id = int(splitted_data[2])
+        required_connections = int(splitted_data[3])
 
         self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
         size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
@@ -45,6 +46,25 @@ class Client:
         self.__client_socket.send(self.__name.encode(TEXT_FORMAT))
 
         self.__initialize(x, y, id)
+
+        starting = GAME_NOT_STARTING_MESSAGE
+        while starting == GAME_NOT_STARTING_MESSAGE:
+            data = self.__client_socket.recv(1024).decode(TEXT_FORMAT)
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            if len(self.__texts) == 0:
+                text = self.__font.render("Waiting for players...", True, (0, 0, 0), (255, 255, 255))
+                r = text.get_rect(center=pygame.Rect(0, 0, self.__window.get_width(), self.__window.get_height()).center)
+                self.__texts.append([text, r[0], r[1], 3])
+            if int(data) < required_connections:
+                should_close = self.__window.render_texts(self.__texts, [], None)
+                if should_close:
+                    self.__is_connected = False
+                    sys.exit()
+            else:
+                starting = GAME_STARTING_MESSAGE
+
+        print("Starting...")
+
         while self.__is_connected:
             self.__update()
 
@@ -114,8 +134,10 @@ class Client:
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
 
 
+            self.__texts.clear()
             text = self.__font.render(f"Winner Is {new_level_data[1]}", True, (0, 0, 0), (255, 255, 255))
-            self.__texts.append([text, 0, 0, 3])
+            r = text.get_rect(center=pygame.Rect(0, 0, self.__window.get_width(), self.__window.get_height()).center)
+            self.__texts.append([text, r[0], r[1], 3])
 
             self.__window.render_texts(self.__texts, [], self.__player)
             time.sleep(3)

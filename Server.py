@@ -12,6 +12,7 @@ class Server:
 
         self.__LOOKING_FOR_CONNECTIONS = True
         self.__MAX_CONNECTIONS = 4
+        self.__REQUIRED_CONNECTIONS = 2
 
         self.__GAMES = []
 
@@ -19,7 +20,7 @@ class Server:
         map_entities, spawn_pos = game.get_map_entities()
         is_connected = True
         id = len(game.entities)
-        msg = f"{spawn_pos[0]},{spawn_pos[1]},{id}".encode(TEXT_FORMAT)
+        msg = f"{spawn_pos[0]},{spawn_pos[1]},{id},{self.__REQUIRED_CONNECTIONS}".encode(TEXT_FORMAT)
         conn.send(msg)
         conn.recv(1024)
         _, size_of_map_entities = self.get_size_of_list_as_bytes(map_entities)
@@ -37,6 +38,15 @@ class Server:
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
+        while len(game.entities) < 2:
+            is_connected = False
+            conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
+            conn.recv(1024)
+        conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
+        conn.recv(1024)
+        is_connected = True
+
+        print("Game started!")
         while is_connected:
             coming_data_size = conn.recv(1024)
             if not coming_data_size:
@@ -51,7 +61,6 @@ class Server:
                 break
 
             coming_data = coming_data.decode(TEXT_FORMAT).split(",")
-
             if my_index >= len(game.entities):
                 my_index = len(game.entities) - 1
             has_won = False
