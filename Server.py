@@ -12,7 +12,7 @@ class Server:
 
         self.__LOOKING_FOR_CONNECTIONS = True
         self.__MAX_CONNECTIONS = 4
-        self.__REQUIRED_CONNECTIONS = 2
+        self.__REQUIRED_CONNECTIONS = 1
 
         self.__GAMES = []
 
@@ -33,19 +33,17 @@ class Server:
 
         name = name.decode(TEXT_FORMAT)
 
-
         data = [name, spawn_pos[0], spawn_pos[1], False, 0.0]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
-        while len(game.entities) < 2:
+        while len(game.entities) < self.__REQUIRED_CONNECTIONS:
             try:
                 conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
                 conn.recv(1024)
             except:
                 is_connected = False
                 break
-
 
         conn.send(str(len(game.entities)).encode(TEXT_FORMAT))
         r = conn.recv(1024)
@@ -108,7 +106,6 @@ class Server:
             else:
                 conn.send(pickle.dumps(NEW_LEVEL_COMING_FALSE))
 
-
         conn.close()
         game.entities.remove(game.entities[my_index])
         if len(game.entities) == 0:
@@ -132,7 +129,7 @@ class Server:
         fastest_player = game.entities[0]
         for e in game.entities:
             if e[4] < fastest_player[4]:
-                e = fastest_player
+                fastest_player = e
 
         return fastest_player
 

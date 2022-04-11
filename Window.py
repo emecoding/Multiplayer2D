@@ -67,19 +67,21 @@ class Window:
         for entity in entities:
             rect = None
             id = ""
+            is_dead = False
             if len(entity) > 2:
                 id = entity[2]
-
             if id != "SPAWN_POINT":
                 if id not in self.__get_every_block_id():
                     rect = pygame.Rect(entity[1], entity[2], 32, 32)
                     pygame.draw.rect(self.__SURFACE, (255, 0, 0), rect)
+                    if len(entity) > 3:
+                        is_dead = entity[3]
                 else:
                     rect = pygame.Rect(entity[0], entity[1], 32, 32)
                     img = self.__block_images[entity[2]]
                     self.__SURFACE.blit(img, (entity[0], entity[1]))
 
-            other_rects.append([rect, id])
+            other_rects.append([rect, id, is_dead])
 
         player.update(self.__SURFACE, keys, other_rects)
 
@@ -109,10 +111,13 @@ class Window:
 
         return self.__should_close
 
-    def loop(self, entities, player):
+    def loop(self, entities, player, texts):
         self.__SURFACE.fill("white")
         if player != None:
             self.__update_entities(entities, player)
+
+        for text in texts:
+            self.__SURFACE.blit(text[0], (text[1], text[2]))
 
         self.__win.blit(self.__SURFACE, (0, 0))
         self.update()

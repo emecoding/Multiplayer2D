@@ -20,6 +20,8 @@ class Client:
         self.__name = self.__get_name()
         self.__texts = []
         self.__font = pygame.font.SysFont('freesansbold.ttf', 32)
+        self.__deaths_text = None
+        self.__timer_text = None
 
     def __get_name(self):
         return str(input("Type name: "))
@@ -27,6 +29,11 @@ class Client:
     def __initialize(self, x, y, id):
         self.__player = Player(x, y)
         self.__window = Window(800, 600, f"Multiplayer 2D({id})({self.__name})")
+
+        self.__deaths_text = self.__font.render(f"Deaths: {self.__player.get_deaths()}", True, (0, 0, 0), (255, 255, 255))
+        self.__timer_text = self.__font.render(f"Time: {float(self.__player.getTime())}", True, (0, 0, 0),
+                                                (255, 255, 255))
+
 
     def connect(self):
         self.__client_socket.connect((self.__HOST, self.__PORT))
@@ -69,6 +76,10 @@ class Client:
 
         print("Starting...")
 
+        self.__texts.clear()
+        self.__texts.append([self.__deaths_text, 0, 30, 3])
+        self.__texts.append([self.__deaths_text, 0, 0, 3])
+
         while self.__is_connected:
             self.__update()
 
@@ -85,6 +96,10 @@ class Client:
         return lst
 
     def __update(self):
+        self.__texts[0] = [self.__font.render(f"Deaths: {self.__player.get_deaths()}", True, (0, 0, 0),
+                                                (255, 255, 255)), self.__texts[0][1], self.__texts[0][2], 0]
+        self.__texts[1] = [self.__font.render(f"Time: {float(self.__player.getTime())}", True, (0, 0, 0),
+                                              (255, 255, 255)), self.__texts[1][1], self.__texts[1][2], 0]
         data, size, msg = self.__player.getDataAsBytes()
         self.__client_socket.send(size)
 
@@ -145,12 +160,16 @@ class Client:
 
             self.__window.render_texts(self.__texts, [], self.__player)
             time.sleep(3)
+            self.__texts.clear()
+            self.__texts.append([self.__deaths_text, 0, 30, 3])
+            self.__texts.append([self.__deaths_text, 0, 0, 3])
 
             self.__player.setPosition(pos[0], pos[1])
             self.__player.has_won = False
+            self.__player.reset_deaths()
             self.__player.start_timer()
 
-        should_close = self.__window.loop(self.__compine_two_lists(other_entities, self.__map_entities), self.__player)
+        should_close = self.__window.loop(self.__compine_two_lists(other_entities, self.__map_entities), self.__player, self.__texts)
         if should_close: self.__is_connected = False
 
 client = Client(PORT, HOST)

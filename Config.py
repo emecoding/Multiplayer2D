@@ -14,8 +14,8 @@ def getPort(host):
             print(f"port {port} didn't work...")
             port = random.randint(1000, 6000)
 
-HOST = "192.168.0.100"#(Windows)#"192.168.0.111"(Linux) #socket.gethostbyname(socket.gethostname())
-PORT = 5000
+HOST = "192.168.0.111"#(Linux) #socket.gethostbyname(socket.gethostname())
+PORT = 5050
 
 
 TEXT_FORMAT = "utf-8"

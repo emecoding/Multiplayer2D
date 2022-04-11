@@ -15,6 +15,9 @@ class Game:
         self.__current_map += 1
         if len(self.__maps) >= self.__current_map:
             self.__current_map = len(self.__maps) - 1
+            return False
+
+        return True
 
     def get_map_entities(self):
         spawn_x = 0

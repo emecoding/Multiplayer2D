@@ -41,6 +41,12 @@ class Player(Entity):
         self.respawn()
         return True
 
+    def get_deaths(self):
+        return self.__deaths
+
+    def reset_deaths(self):
+        self.__deaths = 0
+
     def __hor_movement_collision(self, lst, DX):
         dx = DX
         keys = pygame.key.get_pressed()
@@ -52,16 +58,17 @@ class Player(Entity):
             self.__facing_right = False
 
         for other in lst:
-            if other[1] not in self.__ignore:
-                if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
-                    self.__check_for_win(other[1])
-                    died = self.__check_for_death(other[1])
-                    if died == False:
-                        if dx > 0:
-                            self.__rect__.right = other[0].left
-                        elif dx < 0:
-                            self.__rect__.left = other[0].right
-                        dx = 0
+            if other[2] == False:
+                if other[1] not in self.__ignore:
+                    if other[0].colliderect(self.__rect__.x + dx, self.__rect__.y, self.getWidth(), self.getHeight()):
+                        self.__check_for_win(other[1])
+                        died = self.__check_for_death(other[1])
+                        if died == False:
+                            if dx > 0:
+                                self.__rect__.right = other[0].left
+                            elif dx < 0:
+                                self.__rect__.left = other[0].right
+                            dx = 0
 
         self.__rect__.x += dx
 
@@ -81,18 +88,19 @@ class Player(Entity):
         dy += self.__vel_y
 
         for other in lst:
-            if other[1] not in self.__ignore:
-                if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
-                    self.__check_for_win(other[1])
-                    died = self.__check_for_death(other[1])
-                    if died == False:
-                        if self.__vel_y < 0:
-                            dy = 0
-                            self.__vel_y = 0
-                        elif self.__vel_y >= 0:
-                            dy = 0
-                            self.__jumped = False
-                            self.__vel_y = 0
+            if other[2] == False:
+                if other[1] not in self.__ignore:
+                    if other[0].colliderect(self.__rect__.x, self.__rect__.y + dy, self.getWidth(), self.getHeight()):
+                        self.__check_for_win(other[1])
+                        died = self.__check_for_death(other[1])
+                        if died == False:
+                            if self.__vel_y < 0:
+                                dy = 0
+                                self.__vel_y = 0
+                            elif self.__vel_y >= 0:
+                                dy = 0
+                                self.__jumped = False
+                                self.__vel_y = 0
 
         if self.__rect__.y + dy >= 600 - self.getHeight():
             dy = 0
