@@ -30,9 +30,9 @@ class Game:
         return self.__maps[self.__current_map], [spawn_x, spawn_y]
 
     def __load_map(self, path):
-        map = load(path)
+        map, name = load(path)
         self.__maps.append(map)
-        return map
+        return map, name
 
 
     def get_entities_without_one_index(self, index):

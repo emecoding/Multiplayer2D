@@ -237,7 +237,8 @@ class LevelEditor:
                 "TILE_WIDTH": self.__TILE_WIDTH,
                 "TILE_HEIGHT": self.__TILE_HEIGHT,
                 "EDITOR_MOVEMENT_SPEED": self.__MOVEMENT_SPEED,
-                "GRID_COLOR": self.__GRID_COLOR
+                "GRID_COLOR": self.__GRID_COLOR,
+                "NAME": self.__level_name
             },
 
             "ENTITIES": [
