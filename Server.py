@@ -17,7 +17,8 @@ class Server:
         self.__GAMES = []
 
     def __threaded_client(self, conn:socket.socket, addr, game):
-        map_entities, spawn_pos = game.get_map_entities()
+        map_entities, spawn_pos, name = game.get_random_map_entities()
+        map_entities = game.reset_map(name, map_entities)
         is_connected = True
         id = len(game.entities)
         msg = f"{spawn_pos[0]},{spawn_pos[1]},{id},{self.__REQUIRED_CONNECTIONS}".encode(TEXT_FORMAT)
@@ -93,8 +94,9 @@ class Server:
 
             if won:
                 game.current_map_index_plus()
-                map_entities, spawn_pos = game.get_map_entities()
-                conn.send(pickle.dumps([NEW_LEVEL_COMING_TRUE, fastest_player[0]]))
+                map_entities, spawn_pos, name = game.get_random_map_entities()
+                map_entities = game.reset_map(name, map_entities)
+                conn.send(pickle.dumps([NEW_LEVEL_COMING_TRUE, fastest_player[0], name]))
                 result = conn.recv(1024)
                 conn.send(pickle.dumps(spawn_pos))
                 conn.recv(1024)
@@ -103,6 +105,7 @@ class Server:
                 conn.recv(1024)
                 conn.send(pickle.dumps(map_entities))
                 conn.recv(1024)
+                game.reset_map(name, map_entities)
             else:
                 conn.send(pickle.dumps(NEW_LEVEL_COMING_FALSE))
 

@@ -1,4 +1,5 @@
 from Level import *
+import random
 
 
 class Game:
@@ -19,18 +20,48 @@ class Game:
 
         return True
 
-    def get_map_entities(self):
+    def __remove_from_list(self, item, list):
+        lst = []
+        e = list
+        e.remove(item)
+        for i in e:
+            lst.append(i)
+
+        return lst
+
+    def get_random_map_entities(self):
+        random_map = random.choice(self.__maps)
+        return self.get_map_entities(random_map)
+
+
+    def get_map_entities(self, map=None):
+        if map == None:
+            map = self.__maps[self.__current_map]
+
         spawn_x = 0
         spawn_y = 0
-        for i in self.__maps[self.__current_map]:
+        for i in map:
             if i[2] == "SPAWN_POINT":
                 spawn_x = i[0] + (37 * len(self.entities))
                 spawn_y = i[1]
                 break
-        return self.__maps[self.__current_map], [spawn_x, spawn_y]
+
+        name = map[-1]
+        map.remove(map[-1])
+
+        return map, [spawn_x, spawn_y], name
+
+    def reset_map(self, name, map):
+        for m in self.__maps:
+            if map == m:
+                m.append(name)
+                break
+
+        return map
 
     def __load_map(self, path):
         map, name = load(path)
+        map.append(name)
         self.__maps.append(map)
         return map, name
 

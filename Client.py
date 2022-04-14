@@ -158,6 +158,9 @@ class Client:
             r = text.get_rect(center=pygame.Rect(0, 0, self.__window.get_width(), self.__window.get_height()).center)
             self.__texts.append([text, r[0], r[1], 3])
 
+            level_name_text = self.__font.render(f"Next Level Is {new_level_data[2]}", True, (255, 0, 0), (255, 255, 255))
+            self.__texts.append([level_name_text, r[0] - 30, r[1] + 50, 3])
+
             self.__window.render_texts(self.__texts, [], self.__player)
             time.sleep(3)
             self.__texts.clear()

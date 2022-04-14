@@ -65,6 +65,9 @@ class Window:
         keys = pygame.key.get_pressed()
         other_rects = []
         for entity in entities:
+            if type(entity) != list:
+                continue
+
             rect = None
             id = ""
             is_dead = False
