@@ -27,7 +27,7 @@ class Client:
         return str(input("Type name: "))
 
     def __initialize(self, x, y, id):
-        self.__player = Player(x, y)
+        self.__player = Player(x, y, self.__name)
         self.__window = Window(800, 600, f"Multiplayer 2D({id})({self.__name})")
 
         self.__deaths_text = self.__font.render(f"Deaths: {self.__player.get_deaths()}", True, (0, 0, 0), (255, 255, 255))

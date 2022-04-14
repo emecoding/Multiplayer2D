@@ -4,9 +4,10 @@ import pygame
 pygame.init()
 
 class Player(Entity):
-    def __init__(self, x, y):
+    def __init__(self, x, y, name):
         super().__init__(x, y)
         self.__color__ = (0, 0, 255)
+        self.__name = name
         self.__speed = 5
         self.__vel_y = 0
         self.__acc_y = 0.3
@@ -18,6 +19,10 @@ class Player(Entity):
 
         self.__deaths = 0
         self.__ignore = ["SPAWN_POINT"]
+
+        self.__font = pygame.font.SysFont('freesansbold.ttf', 32)
+        self.__name_text = self.__font.render(self.__name, True, (0, 0, 0), (255, 255, 255))
+        self.__name_text_rect = self.__name_text.get_rect(center=self.__rect__.center)
 
 
 
@@ -137,5 +142,8 @@ class Player(Entity):
         super().update(surf, keys, other_rects, render=render)
         self.__move(keys, other_rects, surf)
         self.__timer_tick()
+
+        self.__name_text_rect = self.__name_text.get_rect(center=self.__rect__.center)
+        surf.blit(self.__name_text, (self.__name_text_rect[0], self.__name_text_rect[1] - 30))
 
 

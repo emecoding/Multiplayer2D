@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7602fc87-1022-4f1b-ae05-00ceb2364cca" name="Changes" comment="Display deaths and timer">
+    <list default="true" id="7602fc87-1022-4f1b-ae05-00ceb2364cca" name="Changes" comment="Next level name is being sent to client">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game.py" beforeDir="false" afterPath="$PROJECT_DIR$/Game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Dirt_block.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Grass_block.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Rock_block.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/Win.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/killer01.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Images/spawn_point.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Leveleditor/BlockData.json" beforeDir="false" afterPath="$PROJECT_DIR$/Leveleditor/BlockData.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Player.py" beforeDir="false" afterPath="$PROJECT_DIR$/Player.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server.py" beforeDir="false" afterPath="$PROJECT_DIR$/Server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Window.py" beforeDir="false" afterPath="$PROJECT_DIR$/Window.py" afterDir="false" />
     </list>
@@ -46,7 +53,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/Leveleditor/LevelEditor.py" />
   </component>
-  <component name="RunManager" selected="Python.Client">
+  <component name="RunManager" selected="Python.Client2">
     <configuration name="Client" type="PythonConfigurationType" factoryName="Python">
       <module name="Multiplayer2D" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -203,7 +210,14 @@
       <option name="project" value="LOCAL" />
       <updated>1649689452543</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Next level name is being sent to client">
+      <created>1649962214985</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1649962214985</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -226,6 +240,7 @@
     <MESSAGE value="Winning with text" />
     <MESSAGE value="Waiting players" />
     <MESSAGE value="Display deaths and timer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Display deaths and timer" />
+    <MESSAGE value="Next level name is being sent to client" />
+    <option name="LAST_COMMIT_MESSAGE" value="Next level name is being sent to client" />
   </component>
 </project>

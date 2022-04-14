@@ -27,7 +27,7 @@ class Server:
         _, size_of_map_entities = self.get_size_of_list_as_bytes(map_entities)
         conn.send(pickle.dumps(size_of_map_entities))
         conn.recv(1024)
-        conn.send(pickle.dumps(map_entities))
+        conn.sendall(pickle.dumps(map_entities))
         name = conn.recv(1024)
         if not name:
             is_connected = False

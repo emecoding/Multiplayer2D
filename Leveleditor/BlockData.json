@@ -1,11 +1,11 @@
 {
   "BLOCKS": [
-    {"id": "KILLER01", "image": "Images/killer01.png"},
-    {"id": "GRASS_BLOCK", "image": "Images/Grass_block.png"},
-    {"id": "DIRT_BLOCK", "image": "Images/Dirt_block.png"},
-    {"id": "ROCK_BLOCK", "image": "Images/Rock_block.png"},
-    {"id": "WIN", "image": "Images/Win.png"},
-    {"id": "SPAWN_POINT", "image": "Images/spawn_point.png"}
+    {"id": "KILLER01", "image": "Images/Blocks/killer01.png"},
+    {"id": "GRASS_BLOCK", "image": "Images/Blocks/Grass_block.png"},
+    {"id": "DIRT_BLOCK", "image": "Images/Blocks/Dirt_block.png"},
+    {"id": "ROCK_BLOCK", "image": "Images/Blocks/Rock_block.png"},
+    {"id": "WIN", "image": "Images/Blocks/Win.png"},
+    {"id": "SPAWN_POINT", "image": "Images/Blocks/spawn_point.png"}
 
   ]
 }
