@@ -15,6 +15,10 @@ class Entity:
         self.__timer__ = 0
         self.__time_addition__ = 1
         self.__timer_is_ticking__ = True
+        self.__current_animation__ = None
+        self.__current_frame__ = 0
+
+        self.__facing_right__ = True
 
     def start_timer(self):
         self.__timer__ = 0
@@ -45,7 +49,7 @@ class Entity:
         self.__rect__.y = self.__start_y
 
     def getDataAsBytes(self):
-        msg = f"{self.__rect__.x},{self.__rect__.y},{self.has_won},{float(self.__timer__)}"
+        msg = f"{self.__rect__.x},{self.__rect__.y},{self.has_won},{float(self.__timer__)}, {self.__current_animation__[self.__current_frame__]['PATH']},{self.__facing_right__}"
         decoded_msg = msg.encode(TEXT_FORMAT)
         size = self.getSizeOfDataAsBytes(msg)
         return decoded_msg, str(size).encode(TEXT_FORMAT), msg

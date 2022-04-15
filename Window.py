@@ -77,13 +77,24 @@ class Window:
                 id = entity[2]
             if id != "SPAWN_POINT":
                 if id not in self.__get_every_block_id():
+                    is_other_player = False
+                    if len(entity) > 4:
+                        is_other_player = True
+
                     rect = pygame.Rect(entity[1], entity[2], 32, 32)
-                    pygame.draw.rect(self.__SURFACE, (255, 0, 0), rect)
-                    if len(entity) > 3:
+
+                    if is_other_player:
                         is_dead = entity[3]
                         name_text = self.__font.render(entity[0], True, (0, 0, 0), (255, 255, 255))
                         name_text_rect = name_text.get_rect(center=rect.center)
                         self.__SURFACE.blit(name_text, (name_text_rect[0], name_text_rect[1] - 30))
+                        if len(entity) >= 6:
+                            img = pygame.image.load(entity[5].replace(" ", ""))
+                            if entity[6] == False:
+                                img = pygame.transform.flip(img, True, False)
+                            self.__SURFACE.blit(img, (entity[1], entity[2]))
+                    else:
+                        pygame.draw.rect(self.__SURFACE, (255, 0, 0), rect)
                 else:
                     rect = pygame.Rect(entity[0], entity[1], 32, 32)
                     img = self.__block_images[entity[2]]

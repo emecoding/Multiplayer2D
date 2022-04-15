@@ -32,9 +32,9 @@ class Server:
         if not name:
             is_connected = False
 
-        name = name.decode(TEXT_FORMAT)
+        player_name = name.decode(TEXT_FORMAT)
 
-        data = [name, spawn_pos[0], spawn_pos[1], False, 0.0]
+        data = [player_name, spawn_pos[0], spawn_pos[1], False, 0.0]
         game.entities.append(data)
         my_index = len(game.entities) - 1
 
@@ -73,8 +73,13 @@ class Server:
             has_won = False
             if coming_data[2] == "True":
                 has_won = True
+            facing_right = True
+            if coming_data[5] == "False":
+                facing_right = False
 
-            game.entities[my_index] = [game.entities[my_index][0], int(coming_data[0]), int(coming_data[1]), has_won, float(coming_data[3])]
+
+            print(facing_right, player_name)
+            game.entities[my_index] = [game.entities[my_index][0], int(coming_data[0]), int(coming_data[1]), has_won, float(coming_data[3]), coming_data[4], facing_right]
 
             other_entities = game.get_entities_without_one_index(my_index)
             _, size_of_other_entities = self.get_size_of_list_as_bytes(other_entities)

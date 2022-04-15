@@ -5,7 +5,7 @@ from Config import *
 import pygame
 pygame.init()
 
-PLAYERS = ["Clone"]
+PLAYERS = ["Clone", "Shroom"]
 
 class Player(Entity):
     def __init__(self, x, y, name):
@@ -19,7 +19,7 @@ class Player(Entity):
         self.__is_grounded = False
         self.__jumped = False
         self.__shoot_range = 100
-        self.__facing_right = True
+
 
         self.__deaths = 0
         self.__ignore = ["SPAWN_POINT"]
@@ -29,8 +29,7 @@ class Player(Entity):
         self.__name_text_rect = self.__name_text.get_rect(center=self.__rect__.center)
 
         self.__idle_frames_right, self.__idle_frames_left, self.__run_frames_right, self.__run_frames_left = self.get_random_player_animations()
-        self.__current_animation = self.__idle_frames_right
-        self.__current_frame = 0
+        self.__current_animation__ = self.__idle_frames_right
 
         self.__frame_rate = 20
         self.__frame_tick = 0
@@ -55,9 +54,9 @@ class Player(Entity):
         images = []
         for item in items:
             path = abs_path + f"/{item}"
-            image = pygame.image.load(path)
+            image = {"IMG":pygame.image.load(path), "PATH":path}
             if rotate:
-                image = pygame.transform.flip(image, True, False)
+                image["IMG"] = pygame.transform.flip(image["IMG"], True, False)
             images.append(image)
 
         return images
@@ -93,10 +92,10 @@ class Player(Entity):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             dx += self.__speed
-            self.__facing_right = True
+            self.__facing_right__ = True
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             dx -= self.__speed
-            self.__facing_right = False
+            self.__facing_right__ = False
 
         for other in lst:
             if other[2] == False:
@@ -163,15 +162,15 @@ class Player(Entity):
         dy = self.__ver_movement_collision(entities, dy)
 
         if dx != 0:
-            if self.__facing_right:
-                self.__current_animation = self.__run_frames_right
+            if self.__facing_right__:
+                self.__current_animation__ = self.__run_frames_right
             else:
-                self.__current_animation = self.__run_frames_left
+                self.__current_animation__ = self.__run_frames_left
         else:
-            if self.__facing_right:
-                self.__current_animation = self.__idle_frames_right
+            if self.__facing_right__:
+                self.__current_animation__ = self.__idle_frames_right
             else:
-                self.__current_animation = self.__idle_frames_left
+                self.__current_animation__ = self.__idle_frames_left
 
 
         if x < 0:
@@ -189,11 +188,12 @@ class Player(Entity):
         self.__frame_tick += 1
         if self.__frame_tick >= self.__frame_rate:
             self.__frame_tick = 0
-            self.__current_frame += 1
+            self.__current_frame__ += 1
 
-        if self.__current_frame >= len(self.__current_animation):
-            self.__current_frame = 0
-        surf.blit(self.__current_animation[self.__current_frame], self.__rect__)
+        if self.__current_frame__ >= len(self.__current_animation__):
+            self.__current_frame__ = 0
+
+        surf.blit(self.__current_animation__[self.__current_frame__]["IMG"], self.__rect__)
 
 
     def update(self, surf, keys, other_rects, render=False):
