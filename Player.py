@@ -1,7 +1,11 @@
+import random, os
+
 from Entity import Entity
 from Config import *
 import pygame
 pygame.init()
+
+PLAYERS = ["Clone"]
 
 class Player(Entity):
     def __init__(self, x, y, name):
@@ -24,7 +28,39 @@ class Player(Entity):
         self.__name_text = self.__font.render(self.__name, True, (0, 0, 0), (255, 255, 255))
         self.__name_text_rect = self.__name_text.get_rect(center=self.__rect__.center)
 
+        self.__idle_frames_right, self.__idle_frames_left, self.__run_frames_right, self.__run_frames_left = self.get_random_player_animations()
+        self.__current_animation = self.__idle_frames_right
+        self.__current_frame = 0
 
+        self.__frame_rate = 20
+        self.__frame_tick = 0
+
+    def get_random_player_animations(self):
+        name = random.choice(PLAYERS)
+        abs_path = os.path.abspath(f"Images/Players/{name}")
+        abs_path_idle = os.path.abspath(f"{abs_path}/Idle")
+        abs_path_run = os.path.abspath(f"{abs_path}/Run")
+
+        items_in_idle = os.listdir(abs_path_idle)
+        items_in_run = os.listdir(abs_path_run)
+
+        idle_frames_right = self.__convert_items_to_images(items_in_idle, abs_path_idle)
+        idle_frames_left = self.__convert_items_to_images(items_in_idle, abs_path_idle, rotate=True)
+        run_frames_right = self.__convert_items_to_images(items_in_run, abs_path_run)
+        run_frames_left = self.__convert_items_to_images(items_in_run, abs_path_run, rotate=True)
+
+        return idle_frames_right, idle_frames_left, run_frames_right, run_frames_left
+
+    def __convert_items_to_images(self, items, abs_path, rotate=False):
+        images = []
+        for item in items:
+            path = abs_path + f"/{item}"
+            image = pygame.image.load(path)
+            if rotate:
+                image = pygame.transform.flip(image, True, False)
+            images.append(image)
+
+        return images
 
     def getTime(self):
         return self.__timer__
@@ -126,6 +162,18 @@ class Player(Entity):
         dx = self.__hor_movement_collision(entities, dx)
         dy = self.__ver_movement_collision(entities, dy)
 
+        if dx != 0:
+            if self.__facing_right:
+                self.__current_animation = self.__run_frames_right
+            else:
+                self.__current_animation = self.__run_frames_left
+        else:
+            if self.__facing_right:
+                self.__current_animation = self.__idle_frames_right
+            else:
+                self.__current_animation = self.__idle_frames_left
+
+
         if x < 0:
             self.respawn()
         if x > 800 + self.getWidth():
@@ -137,8 +185,18 @@ class Player(Entity):
         if self.__timer_is_ticking__:
             self.__timer__ += self.__time_addition__
 
+    def __animate(self, surf):
+        self.__frame_tick += 1
+        if self.__frame_tick >= self.__frame_rate:
+            self.__frame_tick = 0
+            self.__current_frame += 1
 
-    def update(self, surf, keys, other_rects, render=True):
+        if self.__current_frame >= len(self.__current_animation):
+            self.__current_frame = 0
+        surf.blit(self.__current_animation[self.__current_frame], self.__rect__)
+
+
+    def update(self, surf, keys, other_rects, render=False):
         super().update(surf, keys, other_rects, render=render)
         self.__move(keys, other_rects, surf)
         self.__timer_tick()
@@ -146,4 +204,5 @@ class Player(Entity):
         self.__name_text_rect = self.__name_text.get_rect(center=self.__rect__.center)
         surf.blit(self.__name_text, (self.__name_text_rect[0], self.__name_text_rect[1] - 30))
 
+        self.__animate(surf)
 
