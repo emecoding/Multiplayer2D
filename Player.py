@@ -43,10 +43,10 @@ class Player(Entity):
         items_in_idle = os.listdir(abs_path_idle)
         items_in_run = os.listdir(abs_path_run)
 
-        idle_frames_right = self.__convert_items_to_images(items_in_idle, abs_path_idle)
-        idle_frames_left = self.__convert_items_to_images(items_in_idle, abs_path_idle, rotate=True)
-        run_frames_right = self.__convert_items_to_images(items_in_run, abs_path_run)
-        run_frames_left = self.__convert_items_to_images(items_in_run, abs_path_run, rotate=True)
+        idle_frames_right = self.__convert_items_to_images(items_in_idle, f"Images/Players/{name}/Idle")
+        idle_frames_left = self.__convert_items_to_images(items_in_idle, f"Images/Players/{name}/Idle", rotate=True)
+        run_frames_right = self.__convert_items_to_images(items_in_run, f"Images/Players/{name}/Run")
+        run_frames_left = self.__convert_items_to_images(items_in_run, f"Images/Players/{name}/Run", rotate=True)
 
         return idle_frames_right, idle_frames_left, run_frames_right, run_frames_left
 
