@@ -85,7 +85,7 @@ class Window:
 
                     if is_other_player:
                         is_dead = entity[3]
-                        name_text = self.__font.render(entity[0], True, (0, 0, 0), (255, 255, 255))
+                        name_text = self.__font.render(entity[0], True, (255, 0, 0), (255, 255, 255))
                         name_text_rect = name_text.get_rect(center=rect.center)
                         self.__SURFACE.blit(name_text, (name_text_rect[0], name_text_rect[1] - 30))
                         if len(entity) >= 6:

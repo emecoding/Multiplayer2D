@@ -12,7 +12,7 @@ class Server:
 
         self.__LOOKING_FOR_CONNECTIONS = True
         self.__MAX_CONNECTIONS = 4
-        self.__REQUIRED_CONNECTIONS = 1
+        self.__REQUIRED_CONNECTIONS = 2
 
         self.__GAMES = []
 
@@ -77,10 +77,7 @@ class Server:
             if coming_data[5] == "False":
                 facing_right = False
 
-
-            print(facing_right, player_name)
             game.entities[my_index] = [game.entities[my_index][0], int(coming_data[0]), int(coming_data[1]), has_won, float(coming_data[3]), coming_data[4], facing_right]
-
             other_entities = game.get_entities_without_one_index(my_index)
             _, size_of_other_entities = self.get_size_of_list_as_bytes(other_entities)
             conn.send(pickle.dumps(size_of_other_entities))

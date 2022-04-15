@@ -17,14 +17,51 @@ class Client:
         self.__window: Window = None
         self.__is_connected = True
         self.__map_entities = []
-        self.__name = self.__get_name()
         self.__texts = []
         self.__font = pygame.font.SysFont('freesansbold.ttf', 32)
         self.__deaths_text = None
         self.__timer_text = None
+        self.__name, self.__got_name = self.__get_name()
+
+    def __convert_list_to_string(self, lst):
+        str = ""
+        for l in lst:
+            str += l
+
+        return str
 
     def __get_name(self):
-        return str(input("Type name: "))
+        screen = pygame.display.set_mode((600, 600))
+        pygame.display.set_caption("Menu")
+        got_name = False
+        name = ""
+        while got_name == False:
+            screen.fill("white")
+            name_text = self.__font.render(f"Name: {name}", True, (0, 0, 0), (255, 255, 255))
+            continue_text = self.__font.render("Press Enter To Continue", True, (0, 0, 0), (255, 255, 255))
+            r = name_text.get_rect(center=pygame.Rect(0, 0, 600, 600).center)
+            screen.blit(name_text, r)
+            screen.blit(continue_text, (r[0] - 100, r[1] + 50))
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return "", False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return "", False
+                    if event.key == pygame.K_BACKSPACE:
+                        if len(name) > 0:
+                            lst = list(name)
+                            lst.remove(lst[-1])
+                            name = self.__convert_list_to_string(lst)
+                    elif event.key == pygame.K_RETURN:
+                        if len(name) > 0:
+                            got_name = True
+                    else:
+                        letter = pygame.key.name(event.key)
+                        name += letter
+
+        return name, got_name
 
     def __initialize(self, x, y, id):
         self.__player = Player(x, y, self.__name)
@@ -36,55 +73,56 @@ class Client:
 
 
     def connect(self):
-        self.__client_socket.connect((self.__HOST, self.__PORT))
-        print("Connected to the Server!")
-        data = self.__client_socket.recv(1024).decode(TEXT_FORMAT)
-        splitted_data = data.split(",")
-        x = int(splitted_data[0])
-        y = int(splitted_data[1])
-        id = int(splitted_data[2])
-        required_connections = int(splitted_data[3])
+        if self.__got_name:
+            self.__client_socket.connect((self.__HOST, self.__PORT))
+            print("Connected to the Server!")
+            data = self.__client_socket.recv(1024).decode(TEXT_FORMAT)
+            splitted_data = data.split(",")
+            x = int(splitted_data[0])
+            y = int(splitted_data[1])
+            id = int(splitted_data[2])
+            required_connections = int(splitted_data[3])
 
-        self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-        size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
-        self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-        self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
-
-        self.__client_socket.send(self.__name.encode(TEXT_FORMAT))
-
-        self.__initialize(x, y, id)
-
-        starting = GAME_NOT_STARTING_MESSAGE
-        while starting == GAME_NOT_STARTING_MESSAGE:
-            data = self.__client_socket.recv(1024)
-            if not data:
-                self.__is_connected = False
-                break
-            data = data.decode(TEXT_FORMAT)
             self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
-            if len(self.__texts) == 0:
-                text = self.__font.render("Waiting for players...", True, (0, 0, 0), (255, 255, 255))
-                r = text.get_rect(center=pygame.Rect(0, 0, self.__window.get_width(), self.__window.get_height()).center)
-                self.__texts.append([text, r[0], r[1], 3])
-            if int(data) < required_connections:
-                should_close = self.__window.render_texts(self.__texts, [], None)
-                if should_close:
+            size_of_map_entities = pickle.loads(self.__client_socket.recv(1024))
+            self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+            self.__map_entities = pickle.loads(self.__client_socket.recv(int(size_of_map_entities)))
+
+            self.__client_socket.send(self.__name.encode(TEXT_FORMAT))
+
+            self.__initialize(x, y, id)
+
+            starting = GAME_NOT_STARTING_MESSAGE
+            while starting == GAME_NOT_STARTING_MESSAGE:
+                data = self.__client_socket.recv(1024)
+                if not data:
                     self.__is_connected = False
-                    sys.exit()
-            else:
-                starting = GAME_STARTING_MESSAGE
+                    break
+                data = data.decode(TEXT_FORMAT)
+                self.__client_socket.send(MESSAGE_WAS_SENT_SUCCESSFULLY.encode(TEXT_FORMAT))
+                if len(self.__texts) == 0:
+                    text = self.__font.render("Waiting for players...", True, (0, 0, 0), (255, 255, 255))
+                    r = text.get_rect(center=pygame.Rect(0, 0, self.__window.get_width(), self.__window.get_height()).center)
+                    self.__texts.append([text, r[0], r[1], 3])
+                if int(data) < required_connections:
+                    should_close = self.__window.render_texts(self.__texts, [], None)
+                    if should_close:
+                        self.__is_connected = False
+                        sys.exit()
+                else:
+                    starting = GAME_STARTING_MESSAGE
 
-        print("Starting...")
+            print("Starting...")
 
-        self.__texts.clear()
-        self.__texts.append([self.__deaths_text, 0, 30, 3])
-        self.__texts.append([self.__deaths_text, 0, 0, 3])
+            self.__texts.clear()
+            self.__texts.append([self.__deaths_text, 0, 30, 3])
+            self.__texts.append([self.__deaths_text, 0, 0, 3])
 
-        while self.__is_connected:
-            self.__update()
+            while self.__is_connected:
+                self.__update()
 
-        self.__client_socket.close()
-        print("Closed connection to the server...")
+            self.__client_socket.close()
+            print("Closed connection to the server...")
 
     def __compine_two_lists(self, a, b):
         lst = []
